@@ -1,0 +1,14 @@
+{
+  "http://www.cs.virginia.edu/~bjc8c/": {
+    "admins": [
+      "bradjc"
+    ],
+    "dead": false
+  },
+  "https://alpha.mirror.svc.schuermann.io/": {
+    "admins": [
+      "lschuermann"
+    ],
+    "dead": false
+  }
+}

@@ -1,0 +1,36 @@
+name: "Test mirrors"
+
+on:
+  schedule:
+  - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  testmirrors:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+    # Clone the tock-mirrortest repo
+    - uses: actions/checkout@v4
+
+    # Setup Python. By default this installs dependencies from the
+    # requirements.txt file:
+    - uses: actions/setup-python@v4
+
+    # Test mirrors:
+    - name: Test mirrors
+      run: |
+        ./mirrortest.py
+
+    # Commit changes back to repo:
+    - uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: Update mirror test results
+        commit_user_name: Mirror Test Bot
+        commit_user_email: mirrortestbot@tockos.org
+        commit_author: Mirror Test Bot <mirrortestbot@tockos.org>

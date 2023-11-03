@@ -1,0 +1,29 @@
+{
+  "http://www.cs.virginia.edu/~bjc8c/archive/gcc-riscv64-unknown-elf-8.3.0-ubuntu.zip": {
+    "checksum": "2c82a8f3ac77bf2b24d66abff3aa5e873750c76de24c77e12dae91b9d2f4da27",
+    "size": 271109057,
+    "last_head": 1699043872,
+    "ignored": false,
+    "discovered": [
+      {
+        "repo": "https://github.com/tock/tock",
+        "commit": "9e276c93b3608175f7e7897335537a4e6860e2de"
+      }
+    ],
+    "mirror": "http://www.cs.virginia.edu/~bjc8c/"
+  },
+  "https://alpha.mirror.svc.schuermann.io/files/2023-08-17_gcc-riscv64-unknown-elf-8.3.0-ubuntu.zip": {
+    "checksum": "2c82a8f3ac77bf2b24d66abff3aa5e873750c76de24c77e12dae91b9d2f4da27",
+    "size": 271109057,
+    "last_head": 1699043872,
+    "last_fetch": null,
+    "ignored": false,
+    "discovered": [
+      {
+        "repo": "https://github.com/tock/tock",
+        "commit": "9e276c93b3608175f7e7897335537a4e6860e2de"
+      }
+    ],
+    "mirror": "https://alpha.mirror.svc.schuermann.io/"
+  }
+}
