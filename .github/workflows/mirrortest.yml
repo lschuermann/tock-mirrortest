@@ -11,8 +11,9 @@ jobs:
 
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the
-      # added or changed files to the repository.
+      # added or changed files to the repository, and to create issues:
       contents: write
+      issues: write
 
     steps:
     # Clone the tock-mirrortest repo
@@ -25,10 +26,25 @@ jobs:
     # Test mirrors:
     - name: Test mirrors
       run: |
-        ./mirrortest.py
+        ./mirrortest.py -v \
+          test-mirrors \
+          -u urls.json \
+          -m mirrors.json \
+          --gh-issue-template gh_issue_template.md.j2 \
+          --gh-issue-out issue.md \
+          --diff
+
+    # Create an issue, if the mirrortest script reported errors:
+    - uses: JasonEtco/create-an-issue@v2
+      if: failure()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        filename: issue.md
 
     # Commit changes back to repo:
     - uses: stefanzweifel/git-auto-commit-action@v5
+      if: always() # Run even if the script reported errors
       with:
         commit_message: Update mirror test results
         commit_user_name: Mirror Test Bot

@@ -1,10 +1,7 @@
-Brotli @ file:///build/source/dist/Brotli-1.0.9-cp310-cp310-linux_x86_64.whl
-brotlicffi @ file:///build/source/dist/brotlicffi-1.0.9.2-cp310-abi3-linux_x86_64.whl
-certifi @ file:///build/source/dist/certifi-2022.12.7-py3-none-any.whl
-cffi @ file:///build/cffi-1.15.1/dist/cffi-1.15.1-cp310-cp310-linux_x86_64.whl
-charset-normalizer @ file:///build/source/dist/charset_normalizer-3.0.1-py3-none-any.whl
-idna @ file:///build/idna-3.4/dist/idna-3.4-py3-none-any.whl
-pycparser @ file:///build/pycparser-2.21/dist/pycparser-2.21-py2.py3-none-any.whl
-PySocks @ file:///build/PySocks-1.7.1/dist/PySocks-1.7.1-py3-none-any.whl
-requests @ file:///build/requests-2.29.0/dist/requests-2.29.0-py3-none-any.whl
-urllib3 @ file:///build/urllib3-1.26.14/dist/urllib3-1.26.14-py2.py3-none-any.whl
+certifi==2023.11.17
+charset-normalizer==3.3.2
+idna==3.6
+Jinja2==3.1.3
+MarkupSafe==2.1.3
+requests==2.31.0
+urllib3==2.1.0
