@@ -3,9 +3,10 @@ title: "`test-mirrors` has encountered an error"
 ---
 
 {% for issue in issues %}{% if issue.type == "request_error" %}
-### Request Error for URL {{ issue.url }}
+### Request Error for URL
 
 Details:
+- URL: {{ issue.url }}
 - Mirror: {{ issue.mirror.base_url }}
   - Admins:{% for admin in issue.mirror.admins %} @{{ admin }}{% endfor %}
 
@@ -18,6 +19,7 @@ Error message:
 ### Unexpected Content Length
 
 Details:
+- URL: {{ issue.url }}
 - Mirror: {{ issue.mirror.base_url }}
   - Admins:{% for admin in issue.mirror.admins %} @{{ admin }}{% endfor %}
 - Expected content length (from data on record): {{ issue.record_size }} bytes
@@ -27,6 +29,7 @@ Details:
 ### Content Length Header and Response Mismatch
 
 Details:
+- URL: {{ issue.url }}
 - Mirror: {{ issue.mirror.base_url }}
   - Admins:{% for admin in issue.mirror.admins %} @{{ admin }}{% endfor %}
 - `Content-Length` header: {{ issue.content_length_header }} bytes
@@ -36,6 +39,7 @@ Details:
 ### Checksum Mismatch
 
 Details:
+- URL: {{ issue.url }}
 - Mirror: {{ issue.mirror.base_url }}
   - Admins:{% for admin in issue.mirror.admins %} @{{ admin }}{% endfor %}
 - Expected checksum: `{{ issue.record_checksum }}`
