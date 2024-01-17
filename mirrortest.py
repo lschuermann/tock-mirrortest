@@ -30,6 +30,73 @@ class TransparentHasher:
     def hasher(self):
         return self._hasher
 
+def check_data(mirrors, urls):
+    errors = []
+
+    for mirror_base_url, mirror_config in mirrors.items():
+        # Check required fields and their types:
+        if type(mirror_base_url) != str \
+           or "admins" not in mirror_config \
+           or type(mirror_config["admins"]) != list \
+           or "dead" not in mirror_config \
+           or type(mirror_config["dead"]) != bool \
+           or "replicates" not in mirror_config \
+           or type(mirror_config["replicates"]) != list:
+            errors += [
+                f"Missing or invalid field in mirror \"{mirror_base_url}\""
+            ]
+
+        # Ensure that the "mirrors" field of a mirror refers to another defined
+        # mirror:
+        for replicate_mirror in mirror_config.get("replicates", []):
+            if type(replicate_mirror) != str:
+                errors += [
+                    f"Replicate entry of \"{mirror_base_url}\" not a string"
+                ]
+            elif replicate_mirror not in mirrors:
+                errors += [
+                    f"Mirror \"{mirror_base_url}\" is set to replicate "
+                    + f"non-existant mirror \"{replicate_mirror}\""
+                ]
+
+        # Require all active mirrors to have an admin user defined:
+        if not mirror_config.get("dead", False) and len(mirror_config.get("admins", [])) == 0:
+            errors += [
+                f"Mirror \"{mirror_base_url}\" does not have at least one "
+                + "admin defined."
+            ]
+
+    for url, url_record in urls.items():
+        # Check required fields and their types:
+        #
+        # We ignore the "discovered" field, as it's not relied on by this
+        # script. It's only maintained to keep track of which revision
+        # introduced a given mirror URL.
+        if type(url) != str \
+           or "checksum" not in url_record \
+           or type(url_record["checksum"]) not in [type(None), str] \
+           or "ignored" not in url_record \
+           or type(url_record["ignored"]) != bool \
+           or "last_fetch" not in url_record \
+           or type(url_record["last_fetch"]) not in [type(None), int] \
+           or "last_head" not in url_record \
+           or type(url_record["last_head"]) not in [type(None), int] \
+           or "mirror" not in url_record \
+           or type(url_record["mirror"]) != str \
+           or "size" not in url_record \
+           or type(url_record["size"]) not in [type(None), int]:
+            errors += [
+                f"Missing or invalid field in URL record \"{url}\""
+            ]
+
+        # Make sure that every URL has a mirror defined:
+        if not url_record.get("mirror", "") in mirrors:
+            errors += [
+                f"URL record \"{url}\" points to non-existant mirror."
+            ]
+
+    return errors
+
 def mirrortest(log, mirrors, urls):
     issues = []
 
@@ -176,6 +243,15 @@ def main():
     # Subcommands:
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
+    # check-data subcommand:
+    test_mirrors_parser = subparsers.add_parser("check-data")
+    test_mirrors_parser.add_argument(
+        "-u", "--urls-json", required=True,
+        help="URLs database file")
+    test_mirrors_parser.add_argument(
+        "-m", "--mirrors-json", required=True,
+        help="Mirrors database file")
+
     # test-mirrors subcommand:
     test_mirrors_parser = subparsers.add_parser("test-mirrors")
     test_mirrors_parser.add_argument(
@@ -210,25 +286,43 @@ def main():
     else:
         log.setLevel(logging.INFO)
 
-    if args.subcommand == "test-mirrors":
-        # Argument sanity checks:
-        if args.gh_issue_out and not args.gh_issue_template:
-            log.error("Cannot generate GitHub issue without template.")
-            sys.exit(1)
-
-        with open(args.gh_issue_template, "r") as f:
-            gh_issue_template = jinja2.Template(f.read())
-
+    if args.subcommand in ["check-data", "test-mirrors"]:
         with open(args.urls_json, "r") as f:
             urls = json.load(f)
 
         with open(args.mirrors_json, "r") as f:
             mirrors = json.load(f)
 
+        errors = check_data(mirrors, urls)
+
+        for error in errors:
+            log.error(error)
+
+        if len(errors) != 0:
+            log.error(
+                "Mirror or URL database has errors or inconsistencies, " +
+                "please fix them!"
+            )
+            return 1
+
+    if args.subcommand == "test-mirrors":
+        # Argument sanity checks:
+        if args.gh_issue_out and not args.gh_issue_template:
+            log.error("Cannot generate GitHub issue without template.")
+            return 1
+
+        with open(args.gh_issue_template, "r") as f:
+            gh_issue_template = jinja2.Template(f.read())
+
         updated_urls = copy.deepcopy(urls)
         issues = mirrortest(log, mirrors, updated_urls)
 
-        if args.diff:
+        # Ensure the the database is still considered valid with the updated
+        # URLs, anything else would indicate an error in this script. If that is
+        # the case, we print the diff and then exit.
+        updated_data_errors = check_data(mirrors, updated_urls)
+
+        if args.diff or len(updated_data_errors) != 0:
             diffstr = lambda s: list(map(lambda l: l + "\n", s.split("\n")))
             original_str = diffstr(
                 json.dumps(urls, indent=2, sort_keys=True))
@@ -240,6 +334,12 @@ def main():
                 fromfile='urls.json',
                 tofile='updated.json',
             ))
+
+        if len(updated_data_errors) != 0:
+            log.critical("The updated URLs database reports errors:")
+            for error in updated_data_errors:
+                log.error(error)
+            return 1
 
         if not args.dry_run:
             # Write the results back to the urls.json file:

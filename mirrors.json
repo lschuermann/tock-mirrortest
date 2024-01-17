@@ -3,12 +3,16 @@
     "admins": [
       "bradjc"
     ],
-    "dead": false
+    "dead": false,
+    "replicates": []
   },
   "https://alpha.mirror.svc.schuermann.io/": {
     "admins": [
       "lschuermann"
     ],
-    "dead": false
+    "dead": false,
+    "replicates": [
+      "http://www.cs.virginia.edu/~bjc8c/"
+    ]
   }
 }
